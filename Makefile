@@ -10,9 +10,9 @@ IOP_BIN = sputter.irx
 IOP_OBJS = sputter.o imports.o
 IOP_LIBS =
 
-IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration
+IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
 
-all: $(IOP_BIN) never.adp
+all: $(IOP_BIN) never.adp sine.adp
 
 %.adp : %.wav
 	$(PS2SDK)/bin/adpenc -L $< $@
