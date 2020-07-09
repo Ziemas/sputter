@@ -23,6 +23,9 @@ clean:
 run: $(IOP_BIN)
 	ps2client execiop host:$(IOP_BIN)
 
+sim: $(IOP_BIN)
+	PCSX2 --irx=$(IOP_BIN)
+
 reset:
 	ps2client reset
 
