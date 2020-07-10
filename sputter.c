@@ -63,15 +63,16 @@ void runTest()
     u32 sec_prev, usec_prev;
     SysClock2USec(&clock, &sec_prev, &usec_prev);
 
-    u32 nax = 0;
+    u32 nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice)+1);
+
     while (1) {
-        u32 newNax = sceSdGetAddr(SD_VOICE(channel, voice) | SD_VADDR_NAX);
+        u32 newNax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice)+1);
         if (newNax != nax) {
             GetSystemTime(&clock);
             u32 sec_new, usec_new;
             SysClock2USec(&clock, &sec_new, &usec_new);
 
-            printf("New NAX 0x%x, %uus since last change\n", newNax >> 1, (usec_new - usec_prev));
+            printf("New NAX 0x%x, %uus since last change\n", newNax, (usec_new - usec_prev));
 
             usec_prev = usec_new;
             sec_prev = sec_new;
