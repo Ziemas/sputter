@@ -22,12 +22,6 @@ unsigned char adpcm_silence[] __attribute__((aligned(16))) = {
 
 #define SPU_DST_ADDR (0x2800<<1)
 
-//#define TESTFILE "host:sine.adp"
-//const int size = 5888;
-
-//#define TESTFILE "host:never.adp"
-//const int size = 461680;
-
 const int channel = 0;
 const int voice = 0;
 
@@ -50,24 +44,6 @@ void initRegs()
 void runTest()
 {
     initRegs();
-
-    //u32 fd = open(TESTFILE, O_RDONLY);
-    //if (fd < 0) {
-    //    printf("failed top open audio\n");
-    //    return;
-    //}
-
-    //lseek(fd, 16, SEEK_SET);
-
-    //u32 size = QueryMaxFreeMemSize();
-
-    //u8* buffer = AllocSysMemory(ALLOC_FIRST, size, NULL);
-    //if (buffer == NULL) {
-    //    printf("alloc failed\n");
-    //    return;
-    //}
-
-    //read(fd, buffer, size);
 
     int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8*)adpcm_silence, (u32*)SPU_DST_ADDR, sizeof(adpcm_silence));
     if (trans < 0) {
