@@ -23,6 +23,10 @@ I_FreeSysMemory
 I_QueryMaxFreeMemSize
 sysmem_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_memset
+sysclib_IMPORTS_end
+
 ioman_IMPORTS_start
 I_open
 I_close
@@ -31,3 +35,9 @@ I_write
 I_lseek
 I_getstat
 ioman_IMPORTS_end
+
+thbase_IMPORTS_start
+I_DelayThread
+I_GetSystemTime
+I_SysClock2USec
+thbase_IMPORTS_end
