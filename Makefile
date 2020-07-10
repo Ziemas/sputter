@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_BIN = sputter.irx
-IOP_OBJS = sputter.o imports.o
+IOP_OBJS = sputter.o naxtest.o imports.o
 IOP_LIBS =
 
 IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
