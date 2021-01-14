@@ -1,11 +1,4 @@
 #include "sputter.h"
-#include <ioman.h>
-#include <libsd.h>
-#include <modload.h>
-#include <stdio.h>
-#include <sysmem.h>
-#include <thbase.h>
-#include <types.h>
 
 // clang-format off
 unsigned char adpcm_silence[] __attribute__((aligned(16))) = {
@@ -17,16 +10,24 @@ unsigned char adpcm_silence[] __attribute__((aligned(16))) = {
 };
 // clang-format on
 
+typedef struct {
+    u16 nax;
+    u32 usec;
+} naxSample;
+
+static naxSample gSamples[512] = {};
+
 int voice = 1;
 int channel = 0;
 
+#define NAXTEST_PITCH 0x0010
 #define SPU_DST_ADDR (0x2800 << 1)
 
 void initRegs()
 {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x0010);
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, NAXTEST_PITCH);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
 
@@ -40,7 +41,6 @@ void initRegs()
 
 void naxTest()
 {
-
     initRegs();
 
     int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8*)adpcm_silence, (u32*)SPU_DST_ADDR, sizeof(adpcm_silence));
@@ -55,29 +55,42 @@ void naxTest()
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
 
     iop_sys_clock_t clock = { 0 };
+    printf("Pitch %04x\n", NAXTEST_PITCH);
     printf("Keying on!\n");
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
     GetSystemTime(&clock);
 
-    s32 sec_prev, usec_prev;
+    u32 sec_prev, usec_prev;
     SysClock2USec(&clock, &sec_prev, &usec_prev);
 
     u32 nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-    printf("NAX: 0x%x\n", nax);
 
-    while (1) {
-        u32 newNax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-        if (newNax != nax) {
-            GetSystemTime(&clock);
-            u32 sec_new, usec_new;
-            SysClock2USec(&clock, &sec_new, &usec_new);
+    for (int i = 0; i < 512; i++) {
+        while (1) {
+            u32 newNax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
 
-            printf("New NAX 0x%x, after %dus\n", newNax, (usec_new - usec_prev));
+            if (newNax != nax) {
+                GetSystemTime(&clock);
+                u32 sec_new, usec_new;
 
-            usec_prev = usec_new;
-            sec_prev = sec_new;
-            nax = newNax;
+                SysClock2USec(&clock, &sec_new, &usec_new);
+
+                gSamples[i].nax = newNax;
+                gSamples[i].usec = usec_new - usec_prev;
+
+                usec_prev = usec_new;
+                sec_prev = sec_new;
+                nax = newNax;
+
+                break;
+            }
         }
+    }
+
+    printf("Test concluded:\n");
+
+    for (int i = 0; i < 512; i++) {
+        printf("Saw nax %04x for %ld usec\n", gSamples[i].nax, gSamples[i].usec);
     }
 }
