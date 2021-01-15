@@ -20,7 +20,9 @@ static naxSample gSamples[512] = {};
 int voice = 1;
 int channel = 0;
 
-#define NAXTEST_PITCH 0x0010
+//#define NAXTEST_PITCH 0x0010
+//#define NAXTEST_PITCH 0x500
+#define NAXTEST_PITCH 0x3FFF
 #define SPU_DST_ADDR (0x2800 << 1)
 
 void initRegs()

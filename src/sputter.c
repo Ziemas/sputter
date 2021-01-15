@@ -9,7 +9,8 @@ s32 _start()
         return -1;
     }
 
-    naxTest();
+    //naxTest();
+    noiseTest();
 
     return 0;
 }

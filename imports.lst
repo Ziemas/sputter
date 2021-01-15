@@ -11,6 +11,7 @@ I_sceSdInit
 I_sceSdVoiceTrans
 I_sceSdSetParam
 I_sceSdSetSwitch
+I_sceSdSetCoreAttr
 I_sceSdSetAddr
 I_sceSdGetAddr
 I_sceSdVoiceTransStatus
@@ -40,4 +41,6 @@ thbase_IMPORTS_start
 I_DelayThread
 I_GetSystemTime
 I_SysClock2USec
+I_USec2SysClock
+I_SetAlarm
 thbase_IMPORTS_end

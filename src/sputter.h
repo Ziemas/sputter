@@ -6,5 +6,7 @@
 #define SPU_WAIT_FOR_TRANSFER 1
 
 void naxTest();
+void noiseTest();
+void playSound();
 
 #endif // __SPUTTER_H_

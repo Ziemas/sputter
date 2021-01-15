@@ -7,12 +7,12 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_BIN = sputter.irx
-IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o imports.o
+IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o src/playsound.o imports.o
 IOP_LIBS =
 
 IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
 
-all: $(IOP_BIN)
+all: $(IOP_BIN) never.adp sine.adp
 
 %.adp : %.wav
 	$(PS2SDK)/bin/adpenc -L $< $@
@@ -24,7 +24,9 @@ run: $(IOP_BIN)
 	ps2client execiop host:$(IOP_BIN)
 
 sim: $(IOP_BIN)
-	PCSX2 --irx=$(IOP_BIN)
+	PCSX2 --elf="hello.elf"
+
+#PCSX2 --irx=$(IOP_BIN)
 
 reset:
 	ps2client reset
