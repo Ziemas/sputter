@@ -61,7 +61,4 @@ void playSound() {
 
     sceSdSetAddr(SD_VOICE(channel, voice), SPU_DST_ADDR);
     sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
-
-    while (1)
-        ;
 }

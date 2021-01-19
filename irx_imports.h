@@ -10,5 +10,6 @@
 #include <sysclib.h>
 #include <sysmem.h>
 #include <thbase.h>
+#include <timrman.h>
 
 #endif // __IRX_IMPORTS_H_

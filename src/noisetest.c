@@ -9,8 +9,11 @@ unsigned int newNoise(void *common) {
     sceSdSetCoreAttr(SD_CORE_NOISE_CLK | 0, noiseValues[*idx]);
     *idx = (*idx + 1) % 8;
 
+    iop_sys_clock_t time = {};
+    USec2SysClock(2000000, &time);
+
     // Return cycles to wait until next call
-    return 200000000;
+    return time.lo;
 }
 
 void noiseTest() {
@@ -38,6 +41,7 @@ void noiseTest() {
 
     sceSdSetSwitch(0 | SD_SWITCH_KON, (1 << 0));
 
+    printf("hi %08lx lo %08lx\n", time.hi, time.lo);
     printf("Setting alarm\n");
     SetAlarm(&time, &newNoise, &noiseIdx);
     while (1)

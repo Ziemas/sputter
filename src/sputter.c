@@ -11,7 +11,8 @@ s32 _start()
 
     //naxTest();
     //noiseTest();
-    playSound();
+    //playSound();
+    envx();
 
     return 0;
 }

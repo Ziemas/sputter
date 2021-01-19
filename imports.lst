@@ -44,3 +44,8 @@ I_SysClock2USec
 I_USec2SysClock
 I_SetAlarm
 thbase_IMPORTS_end
+
+timrman_IMPORTS_start
+I_AllocHardTimer
+I_GetTimerCounter
+timrman_IMPORTS_end
