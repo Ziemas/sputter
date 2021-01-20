@@ -11,7 +11,7 @@ static unsigned char adpcm_silence[] __attribute__((aligned(16))) = {
 // clang-format on
 
 
-#define SAMPLES_MAX 1024
+#define SAMPLES_MAX 4096
 
 
 typedef struct {
@@ -41,8 +41,8 @@ static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, NAXTEST_PITCH);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_LINEARi, 0x3f, 4, 0xa));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARd, 0x3a, SD_ADSR_RR_EXPd, 0));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0x3f, 4, 0xa));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 0x3a, SD_ADSR_RR_EXPd, 0));
 
     sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
