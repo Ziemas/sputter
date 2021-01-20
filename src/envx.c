@@ -10,15 +10,19 @@ static unsigned char adpcm_silence[] __attribute__((aligned(16))) = {
 };
 // clang-format on
 
+
+#define SAMPLES_MAX 1024
+
+
 typedef struct {
     u16 envx;
     u32 cycle;
 } envxSample;
 
 typedef struct {
-    envxSample samples[512];
+    envxSample samples[SAMPLES_MAX];
     u32 sampleIdx;
-    u32 cycleAcc;
+    u32 startCycle;
     int timer;
     volatile int flag;
 } sampleData;
@@ -37,8 +41,8 @@ static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, NAXTEST_PITCH);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xa));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_LINEARi, 0x3f, 4, 0xa));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARd, 0x3a, SD_ADSR_RR_EXPd, 0));
 
     sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
@@ -51,17 +55,19 @@ static void initRegs() {
 unsigned int timerCb(void *common) {
     sampleData *d = (sampleData *)common;
 
-    if (d->sampleIdx >= 512) {
+    if (d->sampleIdx >= SAMPLES_MAX) {
         d->flag = 1;
         return 0;
     }
 
     d->samples[d->sampleIdx].envx = *SD_VP_ENVX(channel, voice);
-    d->samples[d->sampleIdx].cycle = GetTimerCounter(d->timer);
+    d->samples[d->sampleIdx].cycle = GetTimerCounter(d->timer) - d->startCycle;
+
+    //printf("Saw envx %04x at cycle %lu\n", d->samples[d->sampleIdx].envx, d->samples[d->sampleIdx].cycle);
     d->sampleIdx++;
 
     iop_sys_clock_t clock = {0};
-    USec2SysClock(500000, &clock);
+    USec2SysClock(5000, &clock);
 
     return clock.lo;
 }
@@ -80,25 +86,37 @@ void envx() {
 
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
 
-    printf("Keying on!\n");
-    sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
-
     #define TC_SYSCLOCK 1
     data.timer =  AllocHardTimer(TC_SYSCLOCK, 32, 1);
 
     iop_sys_clock_t clock = {0};
-    USec2SysClock(500000, &clock);
+    USec2SysClock(10, &clock);
+
+
+    printf("Keying on!\n");
+    sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
+    data.startCycle = GetTimerCounter(data.timer);
+    timerCb((void *)&data);
+
     SetAlarm(&clock, &timerCb, &data);
 
     while (data.flag == 0)
         ;
 
-    printf("Test concluded:\n");
+    printf("Test concluded\n");
 
-    for (int i = 0; i < 512; i++) {
-        printf("Saw envx %04x at cycle %ld\n", data.samples[i].envx, data.samples[i].cycle);
+    u32 fd = open("host0:result2", O_RDWR | O_CREAT);
+    if (!fd) {
+        printf("Failed to open file");
+        return;
     }
 
-    while (1)
+    for (int i = 0; i < SAMPLES_MAX; i++) {
+        fdprintf(fd, "%lu, %d\n", data.samples[i].cycle, data.samples[i].envx);
+        //printf("%lu, %u\n", data.samples[i].cycle, data.samples[i].envx);
+    }
+
+    while(1)
         ;
+
 }
