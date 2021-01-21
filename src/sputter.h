@@ -9,5 +9,6 @@ void naxTest();
 void envx();
 void noiseTest();
 void playSound();
+void blockRead();
 
 #endif // __SPUTTER_H_

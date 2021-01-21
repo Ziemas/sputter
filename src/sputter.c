@@ -2,17 +2,33 @@
 
 IRX_ID("sputter", 1, 1);
 
-s32 _start()
-{
+int thid = 0;
+
+void sputterThread(void *param) {
+    //naxTest();
+    //noiseTest();
+    //playSound();
+    //envx();
+    printf("sputter alive\n");
+    blockRead();
+}
+
+s32 _start() {
     if (sceSdInit(0) < 0) {
         printf("SD INIT FAILED");
         return -1;
     }
 
-    //naxTest();
-    //noiseTest();
-    //playSound();
-    envx();
+    iop_thread_t thread = {};
+    thread.attr = TH_C;
+    thread.thread = &sputterThread;
+    thread.priority = 40;
+    thread.stacksize = 0x800;
+
+    thid = CreateThread(&thread);
+    if (thid > 0) {
+        StartThread(thid, NULL);
+    }
 
     return 0;
 }
