@@ -5,12 +5,14 @@ IRX_ID("sputter", 1, 1);
 int thid = 0;
 
 void sputterThread(void *param) {
+    printf("sputter alive\n");
     //naxTest();
     //noiseTest();
-    //playSound();
+    playSound();
     //envx();
-    printf("sputter alive\n");
-    blockRead();
+    //blockRead();
+    while(1)
+        ;
 }
 
 s32 _start() {

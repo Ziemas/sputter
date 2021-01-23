@@ -25,11 +25,11 @@ void noiseTest() {
 
     sceSdSetCoreAttr(SD_CORE_NOISE_CLK | 0, 0x03);
 
-    sceSdSetParam(SD_VOICE(0, 0) | SD_VPARAM_VOLR, 0x3fff);
-    sceSdSetParam(SD_VOICE(0, 0) | SD_VPARAM_VOLL, 0x3fff);
-    sceSdSetParam(SD_VOICE(0, 0) | SD_VPARAM_PITCH, 0x1000);
-    sceSdSetParam(SD_VOICE(0, 0) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
-    sceSdSetParam(SD_VOICE(0, 0) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLR, 0x0ff);
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLL, 0x00ff);
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_PITCH, 0x1000);
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
 
     sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);

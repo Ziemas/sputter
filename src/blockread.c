@@ -36,7 +36,7 @@ int transHandler(u32 channel, void *data, void **addr, int *size) {
 }
 
 void blockRead() {
-    playSound();
+    printf("sputter host streaming starting\n");
 
     for (int i = 0; i < 2; i++) {
         if (data.buffers[i] == NULL) {
@@ -63,7 +63,7 @@ void blockRead() {
 
     data.sema = CreateSema(&sema);
 
-    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_VOICE1 | SD_BLOCK_COUNT(1),
+    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C1_SINL | SD_BLOCK_COUNT(1),
                     data.scratchpad, 1 * 1024, &transHandler, &data);
 
     printf("-----------\n");
