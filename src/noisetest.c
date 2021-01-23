@@ -1,6 +1,7 @@
 #include "sputter.h"
 
-u8 noiseIdx = 0;
+static u8 noiseIdx = 0;
+static int voice = 1;
 
 unsigned int newNoise(void *common) {
     static u8 noiseValues[8] = {0x07, 0x0E, 0x15, 0x1c, 0x23, 0x2a, 0x31, 0x3f};
