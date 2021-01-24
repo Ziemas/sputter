@@ -25,8 +25,8 @@ void noiseTest() {
 
     sceSdSetCoreAttr(SD_CORE_NOISE_CLK | 0, 0x03);
 
-    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLR, 0x0ff);
-    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLL, 0x00ff);
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLR, 0x3fff);
+    sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_PITCH, 0x1000);
     sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
     sceSdSetParam(SD_VOICE(0, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
@@ -38,13 +38,11 @@ void noiseTest() {
     sceSdSetParam(1 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(1 | SD_PARAM_MVOLR, 0x3fff);
 
-    sceSdSetSwitch(0 | SD_SWITCH_NON, (1 << 0));
+    sceSdSetSwitch(0 | SD_SWITCH_NON, (1 << voice));
 
-    sceSdSetSwitch(0 | SD_SWITCH_KON, (1 << 0));
+    sceSdSetSwitch(0 | SD_SWITCH_KON, (1 << voice));
 
     printf("hi %08lx lo %08lx\n", time.hi, time.lo);
     printf("Setting alarm\n");
     SetAlarm(&time, &newNoise, &noiseIdx);
-    while (1)
-        ;
 }

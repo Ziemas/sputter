@@ -2,17 +2,34 @@
 
 IRX_ID("sputter", 1, 1);
 
-int thid = 0;
+#define RECORD
+
+int sputterThid = 0;
+int recThid = 0;
 
 void sputterThread(void *param) {
     printf("sputter alive\n");
+
+#ifdef RECORD
+    iop_thread_t streamThread = {};
+    streamThread.attr = TH_C;
+    streamThread.thread = &blockRead;
+    streamThread.priority = 30;
+    streamThread.stacksize = 0x800;
+
+    recThid = CreateThread(&streamThread);
+    if (recThid > 0) {
+        StartThread(recThid, NULL);
+    }
+#endif
+
     //naxTest();
-    //noiseTest();
-    playSound();
+    noiseTest();
+    //playSound();
     //envx();
     //blockRead();
-    while(1)
-        ;
+
+    SleepThread();
 }
 
 s32 _start() {
@@ -24,12 +41,12 @@ s32 _start() {
     iop_thread_t thread = {};
     thread.attr = TH_C;
     thread.thread = &sputterThread;
-    thread.priority = 40;
+    thread.priority = 50;
     thread.stacksize = 0x800;
 
-    thid = CreateThread(&thread);
-    if (thid > 0) {
-        StartThread(thid, NULL);
+    sputterThid = CreateThread(&thread);
+    if (sputterThid > 0) {
+        StartThread(sputterThid, NULL);
     }
 
     return 0;

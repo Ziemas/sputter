@@ -1,9 +1,9 @@
 #include "sputter.h"
 
-static const char* TESTFILE = "host0:sine.adp";
+static const char *TESTFILE = "host0:sine.adp";
 static const int filesize = 5888;
 
-static const char* TESTFILE2 = "host0:never.adp";
+static const char *TESTFILE2 = "host0:never.adp";
 static const int filesize2 = 461680;
 
 static int channel = 0;
@@ -17,13 +17,13 @@ static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x4);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_LINEARd, 0x10));
 
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_PITCH, 0x1000);
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
-    sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPi, 0x7f, SD_ADSR_RR_EXPd, 0));
+    sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPi, 0x7f, SD_ADSR_RR_LINEARd, 0x10));
 
     sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
@@ -34,8 +34,8 @@ static void initRegs() {
 
     sceSdSetSwitch(channel | SD_SWITCH_VMIXL, (1 << (voice + 1)));
     sceSdSetSwitch(channel | SD_SWITCH_VMIXR, (1 << (voice + 1)));
-    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
     sceSdSetSwitch(channel | SD_SWITCH_NON, 0);
+    sceSdSetCoreAttr(SD_CORE_NOISE_CLK | 0, 0xf);
 }
 
 u32 loadSound(const char *filename, u32 size, u32 *spudst) {
@@ -65,7 +65,6 @@ u32 loadSound(const char *filename, u32 size, u32 *spudst) {
     int err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
     if (err < 0) {
         printf("failed to wait for transfer %d", err);
-
     }
 
     FreeSysMemory(buffer);
@@ -75,12 +74,29 @@ u32 loadSound(const char *filename, u32 size, u32 *spudst) {
     return 0;
 }
 
+unsigned int koff2(void *common) {
+
+
+    sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
+    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
+
+    return 0;
+}
+
+unsigned int koff(void *common) {
+
+
+    u32 kon = (1 << voice) | (1 << (voice + 1));
+
+    sceSdSetSwitch(channel | SD_SWITCH_KOFF, kon);
+    return 0;
+}
+
 void playSound() {
     initRegs();
 
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
     sceSdSetAddr(SD_VOICE(channel, voice + 1) | SD_VADDR_SSA, SPU_DST_ADDR2);
-
 
     loadSound(TESTFILE, filesize, (u32 *)SPU_DST_ADDR);
     loadSound(TESTFILE2, filesize2, (u32 *)SPU_DST_ADDR2);
@@ -90,5 +106,14 @@ void playSound() {
     u32 kon = (1 << voice) | (1 << (voice + 1));
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
+
+    iop_sys_clock_t time = {};
+    USec2SysClock(2000000, &time);
+    SetAlarm(&time, &koff, NULL);
+
+    iop_sys_clock_t time2 = {};
+    USec2SysClock(2500000, &time2);
+    SetAlarm(&time, &koff2, NULL);
+
     //sceSdSetSwitch(channel | SD_SWITCH_KON, 1 << voice);
 }

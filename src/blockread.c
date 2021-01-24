@@ -35,7 +35,7 @@ int transHandler(u32 channel, void *data, void **addr, int *size) {
     return 0;
 }
 
-void blockRead() {
+void blockRead(void *param) {
     printf("sputter host streaming starting\n");
 
     for (int i = 0; i < 2; i++) {
