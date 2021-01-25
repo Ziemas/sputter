@@ -29,5 +29,6 @@ void envx();
 void noiseTest();
 void playSound();
 void blockRead();
+void bufdetect();
 
 #endif // __SPUTTER_H_

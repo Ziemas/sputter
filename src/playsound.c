@@ -101,19 +101,22 @@ void playSound() {
     loadSound(TESTFILE, filesize, (u32 *)SPU_DST_ADDR);
     loadSound(TESTFILE2, filesize2, (u32 *)SPU_DST_ADDR2);
 
+    //sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
+    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
+
     printf("starting voices\n");
 
     u32 kon = (1 << voice) | (1 << (voice + 1));
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
 
-    iop_sys_clock_t time = {};
-    USec2SysClock(2000000, &time);
-    SetAlarm(&time, &koff, NULL);
+    //iop_sys_clock_t time = {};
+    //USec2SysClock(2000000, &time);
+    //SetAlarm(&time, &koff, NULL);
 
-    iop_sys_clock_t time2 = {};
-    USec2SysClock(2500000, &time2);
-    SetAlarm(&time, &koff2, NULL);
+    //iop_sys_clock_t time2 = {};
+    //USec2SysClock(2500000, &time2);
+    //SetAlarm(&time, &koff2, NULL);
 
     //sceSdSetSwitch(channel | SD_SWITCH_KON, 1 << voice);
 }
