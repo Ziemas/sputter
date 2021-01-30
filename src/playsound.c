@@ -38,60 +38,6 @@ static void initRegs() {
     sceSdSetCoreAttr(SD_CORE_NOISE_CLK | 0, 0xf);
 }
 
-u32 loadSound(const char *filename, u32 size, u32 *spudst) {
-    u8 *buffer = AllocSysMemory(ALLOC_FIRST, size, NULL);
-    if (buffer == NULL) {
-        printf("Alloc failed\n");
-        return 1;
-    }
-
-    u32 fd = open(filename, O_RDONLY);
-    if (fd < 0) {
-        printf("Opening testfile failed\n");
-        return 1;
-    }
-
-    // skip header data
-    lseek(fd, 16, SEEK_SET);
-    read(fd, buffer, size);
-    close(fd);
-
-    int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, buffer, spudst, size);
-    if (trans < 0) {
-        printf("Bad transfer\n");
-        return 1;
-    }
-
-    int err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
-    if (err < 0) {
-        printf("failed to wait for transfer %d", err);
-    }
-
-    FreeSysMemory(buffer);
-
-    printf("Loaded sound %s size %lu to %08lx\n", filename, size, ((u32)spudst) >> 1);
-
-    return 0;
-}
-
-unsigned int koff2(void *common) {
-
-
-    sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
-    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
-
-    return 0;
-}
-
-unsigned int koff(void *common) {
-
-
-    u32 kon = (1 << voice) | (1 << (voice + 1));
-
-    sceSdSetSwitch(channel | SD_SWITCH_KOFF, kon);
-    return 0;
-}
-
 void playSound() {
     initRegs();
 

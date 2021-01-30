@@ -23,6 +23,7 @@
 #define SD_BLOCK_HANDLER (1 << 7)
 #define SD_BLOCK_COUNT(x) ((x) << 12)
 
+#define TC_SYSCLOCK 1
 
 void naxTest();
 void envx();
@@ -31,4 +32,5 @@ void playSound();
 void blockRead();
 void bufdetect();
 
+u32 loadSound();
 #endif // __SPUTTER_H_

@@ -7,7 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_BIN = sputter.irx
-IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o src/playsound.o src/envx.o src/blockread.o src/bufdetect.o imports.o
+IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o src/playsound.o \
+			src/envx.o src/blockread.o src/bufdetect.o src/dmatest.o imports.o
 IOP_LIBS =
 
 IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
