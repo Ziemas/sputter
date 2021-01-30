@@ -31,6 +31,7 @@ void noiseTest();
 void playSound();
 void blockRead();
 void bufdetect();
+void dmatest();
 
-u32 loadSound();
+u32 loadSound(const char *filename, u32 channel, u32 size, u32 *spudst);
 #endif // __SPUTTER_H_

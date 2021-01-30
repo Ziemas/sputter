@@ -29,6 +29,7 @@ void sputterThread(void *param) {
     //envx();
     //blockRead();
     //bufdetect();
+    dmatest();
 
     SleepThread();
 }

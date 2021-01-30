@@ -13,7 +13,7 @@ IOP_LIBS =
 
 IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
 
-all: $(IOP_BIN) never.adp sine.adp
+all: $(IOP_BIN) never.adp sine.adp takanaka.adp
 
 %.adp : %.wav
 	$(PS2SDK)/bin/adpenc -L $< $@
