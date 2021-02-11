@@ -44,8 +44,8 @@ void playSound() {
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
     sceSdSetAddr(SD_VOICE(channel, voice + 1) | SD_VADDR_SSA, SPU_DST_ADDR2);
 
-    loadSound(TESTFILE, filesize, (u32 *)SPU_DST_ADDR);
-    loadSound(TESTFILE2, filesize2, (u32 *)SPU_DST_ADDR2);
+    loadSound(TESTFILE, channel, filesize, (u32 *)SPU_DST_ADDR);
+    loadSound(TESTFILE2, channel, filesize2, (u32 *)SPU_DST_ADDR2);
 
     //sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
     sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));

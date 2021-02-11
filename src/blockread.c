@@ -1,6 +1,6 @@
 #include "sputter.h"
 
-static int channel = 0;
+static int channel = 1;
 
 typedef struct {
     u8 *buffers[2];
@@ -63,7 +63,7 @@ void blockRead(void *param) {
 
     data.sema = CreateSema(&sema);
 
-    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C1_SINL | SD_BLOCK_COUNT(1),
+    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_VOICE1 | SD_BLOCK_COUNT(1),
                     data.scratchpad, 1 * 1024, &transHandler, &data);
 
     printf("-----------\n");

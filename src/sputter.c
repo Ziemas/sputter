@@ -26,10 +26,10 @@ void sputterThread(void *param) {
     //naxTest();
     //noiseTest();
     //playSound();
-    //envx();
+    envx();
     //blockRead();
     //bufdetect();
-    dmatest();
+    //dmatest();
 
     SleepThread();
 }
