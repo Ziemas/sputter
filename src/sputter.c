@@ -55,8 +55,12 @@ s32 _start() {
 }
 
 
-u32 loadSound(const char *filename, u32 channel, u32 size, u32 *spudst) {
-    u8 *buffer = AllocSysMemory(ALLOC_FIRST, size, NULL);
+u32 loadSound(const char *filename, u32 channel, u32 *spudst) {
+    io_stat_t stat;
+    getstat(filename, &stat);
+    printf("size %d\n", stat.size);
+
+    u8 *buffer = AllocSysMemory(ALLOC_FIRST, stat.size, NULL);
     if (buffer == NULL) {
         printf("Alloc failed\n");
         return 1;
@@ -70,10 +74,10 @@ u32 loadSound(const char *filename, u32 channel, u32 size, u32 *spudst) {
 
     // skip header data
     lseek(fd, 16, SEEK_SET);
-    read(fd, buffer, size);
+    read(fd, buffer, stat.size);
     close(fd);
 
-    int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, buffer, spudst, size);
+    int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, buffer, spudst, stat.size);
     if (trans < 0) {
         printf("Bad transfer\n");
         return 1;
@@ -87,7 +91,7 @@ u32 loadSound(const char *filename, u32 channel, u32 size, u32 *spudst) {
 
     FreeSysMemory(buffer);
 
-    printf("Loaded sound %s size %lu to %08lx\n", filename, size, ((u32)spudst) >> 1);
+    printf("Loaded sound %s size %lu to %08lx\n", filename, stat.size, ((u32)spudst) >> 1);
 
-    return 0;
+    return stat.size;
 }
