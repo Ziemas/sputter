@@ -1,6 +1,6 @@
 #include "sputter.h"
 
-static u32 transpos[4];
+static u32 transpos[5];
 static int buf[64];
 static u8 autodmabuf[4096];
 
@@ -38,7 +38,7 @@ void sync() {
         u32 status = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
         transpos[pos] = status - (u32)&autodmabuf;
 
-        //printf("status %08lx\n", transpos[pos]);
+        printf("status %08lx\n", transpos[pos]);
         seen[i] = transpos[pos];
         i++;
 
@@ -57,7 +57,7 @@ void sync() {
         timeout++;
         if (timeout > 10000) {
             timeout = 0;
-            //printf("Timeout, %08lx\n", transpos[pos]);
+            printf("Timeout, %08lx\n", transpos[pos]);
             transpos[pos] = 3072;
             pos++;
         }
@@ -71,27 +71,27 @@ void bufdetect() {
 
     sceSdBlockTrans(0, SD_TRANS_LOOP, autodmabuf, 0x1000u);
 
-    int timeout = 10000;
-    u16 sample = 0;
-    while (timeout--) {
-        sceSdVoiceTrans(1, 1, (u8 *)&buf, (u32 *)0x4400, 64);
-        fastwait();
+    //int timeout = 10000;
+    //u16 sample = 0;
+    //while (timeout--) {
+    //    sceSdVoiceTrans(1, 1, (u8 *)&buf, (u32 *)0x4400, 64);
+    //    fastwait();
 
-        sample = buf[0];
+    //    sample = buf[0];
 
-        if (sample == 0x5555) {
-            for (int i = 0; i < 10; i++)
-            {
-                printf("%04x", buf[i]);
-            }
-            printf("\n");
-            break;
-        }
-    }
+    //    if (sample == 0x5555) {
+    //        for (int i = 0; i < 10; i++)
+    //        {
+    //            printf("%04x", buf[i]);
+    //        }
+    //        printf("\n");
+    //        break;
+    //    }
+    //}
 
-    printf("sample %04x\n", sample);
+    //printf("sample %04x\n", sample);
 
-    return;
+    //return;
 
     int it = 0;
     int test = 0;

@@ -23,13 +23,15 @@ void sputterThread(void *param) {
     }
 #endif
 
+    //memdump();
     //naxTest();
     //noiseTest();
-    //playSound();
-    envx();
+    playSound();
+    //envx();
     //blockRead();
     //bufdetect();
     //dmatest();
+    //reverbtest();
 
     SleepThread();
 }

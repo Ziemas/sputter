@@ -3,6 +3,9 @@
 #include "irx_imports.h"
 #include "spu2regs.h"
 
+#define USEC_SECOND 1000000
+#define USEC_MS 1000
+
 #define SPU_WAIT_FOR_TRANSFER 1
 
 #define SD_BLOCK_C0_VOICE1 (0x0 << 8)
@@ -22,6 +25,19 @@
 
 #define SD_BLOCK_HANDLER (1 << 7)
 #define SD_BLOCK_COUNT(x) ((x) << 12)
+
+#define SD_MMIX_SINER  (1 <<  0)
+#define SD_MMIX_SINEL  (1 <<  1)
+#define SD_MMIX_SINR   (1 <<  2)
+#define SD_MMIX_SINL   (1 <<  3)
+#define SD_MMIX_MINER  (1 <<  4)
+#define SD_MMIX_MINEL  (1 <<  5)
+#define SD_MMIX_MINR   (1 <<  6)
+#define SD_MMIX_MINL   (1 <<  7)
+#define SD_MMIX_MSNDER (1 <<  8)
+#define SD_MMIX_MSNDEL (1 <<  9)
+#define SD_MMIX_MSNDR  (1 << 10)
+#define SD_MMIX_MSNDL  (1 << 11)
 
 #define TC_SYSCLOCK 1
 

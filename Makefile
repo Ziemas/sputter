@@ -8,15 +8,19 @@
 
 IOP_BIN = sputter.irx
 IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o src/playsound.o \
-			src/envx.o src/blockread.o src/bufdetect.o src/dmatest.o imports.o
+			src/envx.o src/blockread.o src/bufdetect.o src/dmatest.o \
+			src/reverb.o src/memdump.o imports.o
 IOP_LIBS =
 
 IOP_CFLAGS += -Wall -fno-common -Werror-implicit-function-declaration -std=c99
 
-all: $(IOP_BIN) never.adp sine.adp takanaka.adp
+all: $(IOP_BIN) never.adp sine.adp takanaka.adp click.adp superape.adp
 
 %.adp : %.wav
 	$(PS2SDK)/bin/adpenc -L $< $@
+
+
+#$(PS2SDK)/bin/adpenc -L $< $@
 
 clean:
 	rm -f $(IOP_BIN) $(IOP_OBJS) *.adp

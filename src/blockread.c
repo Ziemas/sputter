@@ -15,7 +15,7 @@ typedef struct {
 static transData data = {};
 static u32 outFd;
 
-int transHandler(u32 channel, void *data, void **addr, int *size) {
+static int transHandler(u32 channel, void *data, void **addr, int *size) {
     transData *d = (transData *)data;
     *addr = d->scratchpad;
     *size = 1024;
@@ -63,7 +63,7 @@ void blockRead(void *param) {
 
     data.sema = CreateSema(&sema);
 
-    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_VOICE1 | SD_BLOCK_COUNT(1),
+    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_MEMOUTL | SD_BLOCK_COUNT(1),
                     data.scratchpad, 1 * 1024, &transHandler, &data);
 
     printf("-----------\n");
