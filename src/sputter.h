@@ -48,8 +48,10 @@ void playSound();
 void blockRead();
 void bufdetect();
 void reverbtest();
+void reverbregtest();
 void dmatest();
 void memdump(char* filename);
+void memfill(u8 value);
 
 u32 loadSound(const char *filename, u32 channel, u32 *spudst);
 #endif // __SPUTTER_H_

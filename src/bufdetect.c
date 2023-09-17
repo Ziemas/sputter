@@ -13,7 +13,7 @@ void fastwait() {
 
 u8 seen[0x1000] = {};
 
-void sync() {
+void sync_buf() {
     memset(buf, 0, sizeof(buf));
     memset(autodmabuf, 0, sizeof(autodmabuf));
 
@@ -99,7 +99,7 @@ void bufdetect() {
         sceSdSetCoreAttr(0 | SD_CORE_SPDIF_MODE, 0x801); // SPDIF DVD | SPDIF BITSREAM
 
         sceSdBlockTrans(0, SD_TRANS_LOOP, autodmabuf, 0x1000u);
-        sync();
+        sync_buf();
 
         for (int i = 1; i < 5; i++) {
             u32 p = transpos[i];

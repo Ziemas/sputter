@@ -5,6 +5,7 @@
 
 #include <ioman.h>
 #include <libsd.h>
+#include <loadcore.h>
 #include <modload.h>
 #include <stdio.h>
 #include <sysclib.h>

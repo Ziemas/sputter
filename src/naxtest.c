@@ -71,6 +71,7 @@ void naxTest() {
     // sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
     // printf("Voice transfer complete\n");
 
+                sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
 
     printf("Pitch %04x\n", NAXTEST_PITCH);
@@ -151,7 +152,7 @@ void naxTest() {
                 break;
             }
 
-            if (timeout >= 100000) {
+            if (timeout >= 1000) {
                 gSamples[i].mark = NAX_TIMEOUT;
                 gSamples[i].nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
                 gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
@@ -161,6 +162,7 @@ void naxTest() {
             }
 
             timeout++;
+            DelayThread(10);
         }
     }
 

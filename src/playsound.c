@@ -8,18 +8,19 @@ static const char *TESTFILE2 = "host0:never.adp";
 static const int filesize2 = 461680;
 
 static int channel = 0;
-static int voice = 0;
+static int voice = 22;
 
 static int param_idx = 0;
 
-static const u32 SPU_DST_ADDR = (0x2800 << 1);
+static const u32 SPU_DST_ADDR = (0x3800 << 1);
 static const u32 SPU_DST_ADDR2 = (0x4800 << 1);
 
 static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x1000);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0x6F, 0xf, 0xf));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x2);
+    // sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0x6F, 0xf, 0xf));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARi, 0x36, SD_ADSR_RR_LINEARd, 0x10));
 
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLR, 0x3fff);
@@ -92,12 +93,13 @@ void playSound() {
     loadSound(TESTFILE2, channel, (u32 *)SPU_DST_ADDR2);
 
     // sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
-    // sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
+    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
 
     printf("starting voices\n");
 
     u32 kon = (1 << voice) | (1 << (voice + 1));
     // u32 kon = (1 << (voice + 1));
+    // kon = 0b11110;
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
 
@@ -111,5 +113,5 @@ void playSound() {
 
     // sceSdSetSwitch(channel | SD_SWITCH_KON, 1 << voice);
 
-    SetAlarm(&time, &setnax, &param_idx);
+    // SetAlarm(&time, &setnax, &param_idx);
 }

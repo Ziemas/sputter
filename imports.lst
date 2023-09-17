@@ -41,6 +41,7 @@ sysmem_IMPORTS_end
 sysclib_IMPORTS_start
 I_memset
 I_memcpy
+I_sprintf
 sysclib_IMPORTS_end
 
 ioman_IMPORTS_start
@@ -54,7 +55,9 @@ ioman_IMPORTS_end
 
 thbase_IMPORTS_start
 I_DelayThread
+I_GetThreadId
 I_StartThread
+I_iWakeupThread
 I_CreateThread
 I_SleepThread
 I_GetSystemTime
