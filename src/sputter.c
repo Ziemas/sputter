@@ -2,7 +2,7 @@
 
 IRX_ID("sputter", 1, 1);
 
-// #define RECORD
+#define RECORD
 
 int sputterThid = 0;
 int recThid = 0;
@@ -34,13 +34,18 @@ void sputterThread(void *param) {
     // memdump();
     // naxTest();
     // noiseTest();
-    // playSound();
+     playSound();
     // envx();
+    // slide();
     // blockRead();
     // bufdetect();
     // dmatest();
-    reverbtest();
+    // reverbtest();
     // reverbregtest();
+    //voltest();
+    //reverb_upsample();
+    //dmaspeed();
+    //tsatest();
 
     // SleepThread();
 }

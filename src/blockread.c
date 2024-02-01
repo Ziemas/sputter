@@ -20,7 +20,7 @@ static int transHandler(u32 channel, void *data, void **addr, int *size) {
     *addr = d->scratchpad;
     *size = 1024;
 
-    d->spubuf = 1 - ((*SD_C_IRQINFO >> 4) & 1);
+    d->spubuf = 1 - ((read16(SD_C_IRQINFO) >> 4) & 1);
 
     memcpy(d->buffers[d->activeBuf] + (d->pos * 512), d->scratchpad + (d->spubuf * 512), 512);
 
@@ -50,7 +50,7 @@ void blockRead(void *param) {
         memset(data.buffers[i], 0, 10 * 1024);
     }
 
-    outFd = open("host:outstream", O_CREAT | O_RDWR);
+    outFd = open("host:outstream", O_CREAT | O_RDWR | O_TRUNC);
     if (!outFd) {
         printf("Failed to open output file\n");
         return;
@@ -63,18 +63,18 @@ void blockRead(void *param) {
 
     data.sema = CreateSema(&sema);
 
-    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_MEMOUTL | SD_BLOCK_COUNT(1),
+    sceSdBlockTrans(channel, SD_TRANS_READ | SD_BLOCK_HANDLER | SD_BLOCK_C0_VOICE1 | SD_BLOCK_COUNT(1),
                     data.scratchpad, 1 * 1024, &transHandler, &data);
 
     printf("-----------\n");
-    printf("adma_count %04x\n", *U16_REGISTER(0x1AE + (channel * 1024)));
-    printf("tsa %08x\n", *SD_A_TSA_LO(0) | (*SD_A_TSA_HI(0) << 16));
+    printf("adma_count %04x\n", read16(0x1AE + (channel * 1024)));
+    printf("tsa %08x\n", read16(SD_A_TSA_LO(0)) | read16(SD_A_TSA_HI(0)) << 16);
     printf("-----------\n");
 
     while (1) {
         int err = WaitSema(data.sema);
         if (err) {
-            printf("sema error %d", err);
+            printf("sema error %d\n", err);
             sceSdStopTrans(0);
             return;
         }

@@ -23,6 +23,7 @@ I_sceSdGetParam
 I_sceSdSetEffectAttr
 I_sceSdSetTransIntrHandler
 I_sceSdSetSpu2IntrHandler
+I_sceSdCleanEffectWorkArea
 libsd_IMPORTS_end
 
 thsemap_IMPORTS_start

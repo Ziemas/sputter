@@ -8,7 +8,7 @@ static const char *TESTFILE2 = "host0:never.adp";
 static const int filesize2 = 461680;
 
 static int channel = 0;
-static int voice = 22;
+static int voice = 1;
 
 static int param_idx = 0;
 
@@ -18,10 +18,10 @@ static const u32 SPU_DST_ADDR2 = (0x4800 << 1);
 static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x2);
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x1000);
     // sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0x6F, 0xf, 0xf));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARi, 0x36, SD_ADSR_RR_LINEARd, 0x10));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x0, 0xf));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARi, 0x36, SD_ADSR_RR_LINEARd, 0x0));
 
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLL, 0x3fff);
@@ -35,23 +35,18 @@ static void initRegs() {
     sceSdSetParam(1 | SD_PARAM_AVOLR, 0x3fff);
     sceSdSetParam(1 | SD_PARAM_MVOLL, 0x3fff);
     sceSdSetParam(1 | SD_PARAM_MVOLR, 0x3fff);
-
-    sceSdSetSwitch(channel | SD_SWITCH_VMIXL, (1 << (voice + 1)));
-    sceSdSetSwitch(channel | SD_SWITCH_VMIXR, (1 << (voice + 1)));
-    // sceSdSetSwitch(channel | SD_SWITCH_VMIXL, (1 << (voice)));
-    // sceSdSetSwitch(channel | SD_SWITCH_VMIXR, (1 << (voice)));
 }
 
 unsigned int switchparams(void *common) {
     static u16 params[8] = {0x0, 0x500, 0x1fff, 0x3000, 0x4000, 0x4fff, 0x6fff, 0x7fff};
     u8 *idx = (u8 *)common;
 
-    u32 envx = *SD_VP_ENVX(0, 0);
+    u32 envx = read16(SD_VP_ENVX(0, 0));
     printf("before: %04x\n", envx);
 
-    *SD_VP_ENVX(0, 0) = 0;
+    write16(SD_VP_ENVX(0, 0), 0);
 
-    envx = *SD_VP_ENVX(0, 0);
+    envx = read16(SD_VP_ENVX(0, 0));
     printf("after: %04x\n", envx);
 
     *idx = (*idx + 1) % 8;
@@ -64,7 +59,6 @@ unsigned int switchparams(void *common) {
 }
 
 unsigned int setnax(void *common) {
-
     u32 nax = sceSdGetAddr(SD_VADDR_NAX | SD_VOICE(0, 1));
     printf("before: %08x\n", nax);
 
@@ -80,38 +74,37 @@ unsigned int setnax(void *common) {
     return time.lo;
 }
 
-void playSound() {
-    iop_sys_clock_t time = {};
-    USec2SysClock(USEC_SECOND, &time);
+static unsigned int set_kon(void *) {
+    static int phase = 0;
+    iop_sys_clock_t clock = {0};
+    USec2SysClock(1000000, &clock);
 
+    u32 kon = (1 << voice);
+
+    if (phase) {
+        sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
+    } else {
+        sceSdSetSwitch(channel | SD_SWITCH_KOFF, kon);
+    }
+
+    phase = !phase;
+
+    return clock.lo;
+}
+
+void playSound() {
     initRegs();
 
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
-    sceSdSetAddr(SD_VOICE(channel, voice + 1) | SD_VADDR_SSA, SPU_DST_ADDR2);
-
     loadSound(TESTFILE, channel, (u32 *)SPU_DST_ADDR);
-    loadSound(TESTFILE2, channel, (u32 *)SPU_DST_ADDR2);
-
-    // sceSdSetSwitch(channel | SD_SWITCH_NON, 1 << voice);
-    sceSdSetSwitch(channel | SD_SWITCH_PMON, (1 << (voice + 1)));
 
     printf("starting voices\n");
 
-    u32 kon = (1 << voice) | (1 << (voice + 1));
-    // u32 kon = (1 << (voice + 1));
-    // kon = 0b11110;
+    u32 kon = (1 << voice);
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
 
-    // iop_sys_clock_t time = {};
-    // USec2SysClock(2000000, &time);
-    // SetAlarm(&time, &koff, NULL);
-
-    // iop_sys_clock_t time2 = {};
-    // USec2SysClock(2500000, &time2);
-    // SetAlarm(&time, &koff2, NULL);
-
-    // sceSdSetSwitch(channel | SD_SWITCH_KON, 1 << voice);
-
-    // SetAlarm(&time, &setnax, &param_idx);
+    iop_sys_clock_t clock = {0};
+    USec2SysClock(1000000, &clock);
+    SetAlarm(&clock, set_kon, NULL);
 }

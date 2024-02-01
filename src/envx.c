@@ -60,7 +60,7 @@ unsigned int timerCb(void *common) {
         return 0;
     }
 
-    d->samples[d->sampleIdx].envx = *SD_VP_ENVX(channel, voice);
+    d->samples[d->sampleIdx].envx = read16(SD_VP_ENVX(channel, voice));
     d->samples[d->sampleIdx].cycle = GetTimerCounter(d->timer) - d->startCycle;
 
     //printf("Saw envx %04x at cycle %lu\n", d->samples[d->sampleIdx].envx, d->samples[d->sampleIdx].cycle);

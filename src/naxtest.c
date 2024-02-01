@@ -33,8 +33,8 @@ static int voice = 1;
 static s16 channel = 0;
 
 #define NAXTEST_PITCH 0x100
-//#define NAXTEST_PITCH 0x500
-//#define NAXTEST_PITCH 0x3FFF
+// #define NAXTEST_PITCH 0x500
+// #define NAXTEST_PITCH 0x3FFF
 #define SPU_DST_ADDR (0x4000 << 1)
 
 static void initRegs() {
@@ -71,14 +71,14 @@ void naxTest() {
     // sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
     // printf("Voice transfer complete\n");
 
-                sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
+    sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
 
     printf("Pitch %04x\n", NAXTEST_PITCH);
     // printf("Keying on!\n");
 
-    u32 nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-    u32 lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+    u32 nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+    u32 lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
     // TODO run test with first seen nax included
 
     u32 timeout = 0;
@@ -88,8 +88,8 @@ void naxTest() {
             if (i == 16) {
                 gSamples[i].mark = NAX_SWITCH_PITCH;
                 GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
                 sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0);
 
                 break;
@@ -98,8 +98,8 @@ void naxTest() {
             if (i == 32) {
                 gSamples[i].mark = NAX_KEY_ON;
                 GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
                 sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
 
                 break;
@@ -108,8 +108,8 @@ void naxTest() {
             if (i == 64) {
                 gSamples[i].mark = NAX_UPLOAD;
                 GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
 
                 int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8 *)adpcm_silence, (u32 *)SPU_DST_ADDR, sizeof(adpcm_silence));
                 if (trans < 0) {
@@ -123,15 +123,15 @@ void naxTest() {
                 break;
             }
 
-            u32 newNax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-            u32 newlsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+            u32 newNax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+            u32 newlsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
 
             if (newlsa != lsa) {
                 GetSystemTime(&gSamples[i].clock);
 
                 gSamples[i].mark = NAX_LSA;
                 gSamples[i].nax = newNax;
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
                 GetSystemTime(&gSamples[i].clock);
 
                 lsa = newlsa;
@@ -144,7 +144,7 @@ void naxTest() {
 
                 gSamples[i].mark = NAX_SAMPLE;
                 gSamples[i].nax = newNax;
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
                 GetSystemTime(&gSamples[i].clock);
 
                 nax = newNax;
@@ -154,8 +154,8 @@ void naxTest() {
 
             if (timeout >= 1000) {
                 gSamples[i].mark = NAX_TIMEOUT;
-                gSamples[i].nax = (*SD_VA_NAX(channel, voice) << 16) | *(SD_VA_NAX(channel, voice) + 1);
-                gSamples[i].lsa = (*SD_VA_LSAX(channel, voice) << 16) | *(SD_VA_LSAX(channel, voice) + 1);
+                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
                 GetSystemTime(&gSamples[i].clock);
 
                 break;
