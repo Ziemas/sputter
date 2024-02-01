@@ -7,25 +7,6 @@ I_printf
 I_fdprintf
 stdio_IMPORTS_end
 
-libsd_IMPORTS_start
-I_sceSdInit
-I_sceSdVoiceTrans
-I_sceSdSetParam
-I_sceSdSetSwitch
-I_sceSdSetCoreAttr
-I_sceSdSetAddr
-I_sceSdGetAddr
-I_sceSdVoiceTransStatus
-I_sceSdBlockTrans
-I_sceSdBlockTransStatus
-I_sceSdStopTrans
-I_sceSdGetParam
-I_sceSdSetEffectAttr
-I_sceSdSetTransIntrHandler
-I_sceSdSetSpu2IntrHandler
-I_sceSdCleanEffectWorkArea
-libsd_IMPORTS_end
-
 thsemap_IMPORTS_start
 I_CreateSema
 I_SignalSema
