@@ -71,6 +71,18 @@ void bufdetect() {
 
     sceSdBlockTrans(0, SD_TRANS_LOOP, autodmabuf, 0x1000u);
 
+
+    u32 status = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
+    while (1) {
+        u32 status2 = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
+        if (status == status2) {
+            continue;
+        }
+        status = status2;
+        printf("dma at %x\n", status2);
+    }
+
+
     //int timeout = 10000;
     //u16 sample = 0;
     //while (timeout--) {

@@ -73,6 +73,8 @@ void memfill(u8 value);
 void memfill16(u16 value);
 void dmaspeed();
 void tsatest();
+void deckard_hack();
+void reverb_irq();
 
 u32 loadSound(const char *filename, u32 channel, u32 *spudst);
 #endif // __SPUTTER_H_

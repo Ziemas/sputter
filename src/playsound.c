@@ -19,9 +19,8 @@ static void initRegs() {
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x1000);
-    // sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0x6F, 0xf, 0xf));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x0, 0xf));
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_LINEARi, 0x36, SD_ADSR_RR_LINEARd, 0x0));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPi, 0x7f, SD_ADSR_RR_LINEARd, 0x10));
 
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLR, 0x3fff);
     sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLL, 0x3fff);
@@ -96,7 +95,10 @@ void playSound() {
     initRegs();
 
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
-    loadSound(TESTFILE, channel, (u32 *)SPU_DST_ADDR);
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x300);
+    //loadSound(TESTFILE, channel, (u32 *)SPU_DST_ADDR);
+    loadSound(TESTFILE2, channel, (u32 *)SPU_DST_ADDR);
+    //loadSound("host:shotgun2.adp", channel, (u32 *)SPU_DST_ADDR);
 
     printf("starting voices\n");
 
@@ -104,7 +106,7 @@ void playSound() {
 
     sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
 
-    iop_sys_clock_t clock = {0};
-    USec2SysClock(1000000, &clock);
-    SetAlarm(&clock, set_kon, NULL);
+    //iop_sys_clock_t clock = {0};
+    //USec2SysClock(1000000, &clock);
+    //SetAlarm(&clock, set_kon, NULL);
 }

@@ -18,8 +18,11 @@ static const u32 SPU_DST_ADDR = (0x5450 << 1);
 static u8 buffer[0x40] = {};
 static int loc = SPU_DST_ADDR;
 
+volatile int test;
+
 static int irqHandler(int core, void *data) {
-    printf("core: %d, irqhandler hit at %08x\n", core, *(int *)data);
+    //printf("core: %d, irqhandler hit at %08x\n", core, *(int *)data);
+    test = core + 1;
 
     return 0;
 }
@@ -39,6 +42,10 @@ void dmatest() {
         sceSdVoiceTrans(0, SD_TRANS_WRITE, buffer, (u32 *)SPU_DST_ADDR, 0x40);
         sceSdVoiceTransStatus(0, SPU_WAIT_FOR_TRANSFER);
 
+        if (test) {
+            printf("core: %d, irqhandler hit at %08x\n", test - 1, loc);
+            test = 0;
+        }
         loc++;
     }
 }

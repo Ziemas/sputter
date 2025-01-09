@@ -38,3 +38,47 @@ void dmaspeed() {
         printf("DMA transfer [%d] of %d bytes to %x took %llu cycles\n", i, samples[i].size, dst, time);
     }
 }
+
+static u8 autodmabuf[4096];
+
+void deckard_hack() {
+    memset(autodmabuf, 0, sizeof(autodmabuf));
+    memset(samples, 0, sizeof(samples));
+
+    for (int i = 0; i < 10; i++) {
+        GetSystemTime(&samples[i].start);
+
+        sceSdSetCoreAttr(SD_CORE_NOISE_CLK, 20);
+
+        GetSystemTime(&samples[i].end);
+    }
+
+    for (int i = 0; i < 10; i++) {
+        u64 start = as_u64(samples[i].start.hi, samples[i].start.lo);
+        u64 end = as_u64(samples[i].end.hi, samples[i].end.lo);
+
+        u64 time = end - start;
+        printf("DMA transfer [%d] of %d bytes to %x took %llu cycles\n", i, samples[i].size, dst, time);
+        printf("%u cycles\n", (u32)time);
+    }
+
+    memset(samples, 0, sizeof(samples));
+    sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8 *)0, (u32 *)dst, 0x20000);
+
+    for (int i = 0; i < 10; i++) {
+        GetSystemTime(&samples[i].start);
+
+        sceSdSetCoreAttr(SD_CORE_NOISE_CLK, 20);
+
+        GetSystemTime(&samples[i].end);
+    }
+
+    for (int i = 0; i < 10; i++) {
+        u64 start = as_u64(samples[i].start.hi, samples[i].start.lo);
+        u64 end = as_u64(samples[i].end.hi, samples[i].end.lo);
+
+        u64 time = end - start;
+        printf("DMA transfer [%d] of %d bytes to %x took %llu cycles\n", i, samples[i].size, dst, time);
+        printf("%u cycles\n", (u32)time);
+    }
+}
