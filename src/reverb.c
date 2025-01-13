@@ -94,7 +94,7 @@ void reverb_upsample() {
     u32 start = sceSdGetAddr(channel | SD_ADDR_ESA);
     u32 end = sceSdGetAddr(channel | SD_ADDR_EEA);
     printf("uploading to %x (end %x)\n", start, end);
-    sceSdVoiceTrans(channel, SD_TRANS_WRITE, samples, (u32 *)start, sizeof(samples));
+    sceSdVoiceTrans(channel, SD_TRANS_WRITE, (u8 *)samples, (u32 *)start, sizeof(samples));
 
     // sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
     // loadSound("host0:crash.adp", 0, (u32 *)SPU_DST_ADDR);
