@@ -1,6 +1,9 @@
 #include "spu2regs.h"
 #include "sputter.h"
 
+extern unsigned int size_never;
+extern unsigned char never[];
+
 static const char *TESTFILE = "host0:sine.adp";
 static const int filesize = 5888;
 
@@ -12,7 +15,7 @@ static int voice = 1;
 
 static int param_idx = 0;
 
-static const u32 SPU_DST_ADDR = (0x3800 << 1);
+static const u32 SPU_DST_ADDR = (0x2800 << 1);
 static const u32 SPU_DST_ADDR2 = (0x4800 << 1);
 
 static void initRegs() {
@@ -95,10 +98,22 @@ void playSound() {
     initRegs();
 
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
-    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x300);
+    sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x2000);
     //loadSound(TESTFILE, channel, (u32 *)SPU_DST_ADDR);
-    loadSound(TESTFILE2, channel, (u32 *)SPU_DST_ADDR);
+    //loadSound(TESTFILE2, channel, (u32 *)SPU_DST_ADDR);
     //loadSound("host:shotgun2.adp", channel, (u32 *)SPU_DST_ADDR);
+    //loadSound("host0:drums.adp", channel, (u32 *)SPU_DST_ADDR);
+    //loadSound("host0:never.adp", channel, (u32 *)SPU_DST_ADDR);
+
+    int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, never, (u32 *)SPU_DST_ADDR, size_never);
+    if (trans < 0) {
+        printf("Bad transfer\n");
+    }
+
+    int err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
+    if (err < 0) {
+        printf("failed to wait for transfer %d", err);
+    }
 
     printf("starting voices\n");
 

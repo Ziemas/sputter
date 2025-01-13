@@ -34,7 +34,7 @@ void sputterThread(void *param) {
     // memdump();
     // naxTest();
     // noiseTest();
-     playSound();
+    playSound();
     // envx();
     // slide();
     // blockRead();
