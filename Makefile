@@ -26,7 +26,7 @@ all: $(IOP_BIN) $(EE_LIB) $(TEST_EXE) never.adp sine.adp takanaka.adp click.adp 
 
 $(TEST_EXE): $(EE_OBJS) $(TEST_OBJS)
 	$(DIR_GUARD)
-	$(EE_CC) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $(TEST_EXE) $(TEST_OBJS) $(TEST_LDFLAGS) $(EXTRA_LDFLAGS) $(TEST_LIBS)
+	$(EE_CC) -T$(EE_LINKFILE) $(TEST_CFLAGS) -o $(TEST_EXE) $(TEST_OBJS) $(TEST_LDFLAGS) $(EXTRA_LDFLAGS) $(TEST_LIBS)
 
 %.adp : %.wav
 	$(PS2SDK)/bin/adpenc -L $< $@

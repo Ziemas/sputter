@@ -1,3 +1,4 @@
+#include <sifrpc.h>
 #include <kernel.h>
 #include <loadfile.h>
 
