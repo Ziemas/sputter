@@ -22,7 +22,7 @@ TEST_LIBS = -ldebug
 TEST_CFLAGS += -Wall -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -std=c99 -O0 -g
 TEST_LDFLAGS = $(EE_LDFLAGS) -L$(PS2DEV)/gsKit/lib -L$(PS2SDK)/ports/lib
 
-all: $(IOP_BIN) $(EE_LIB) $(TEST_EXE) never.adp sine.adp takanaka.adp click.adp superape.adp crash.adp
+all: $(IOP_BIN) $(EE_LIB) $(TEST_EXE) never.adp sine.adp click.adp crash.adp
 
 $(TEST_EXE): $(EE_OBJS) $(TEST_OBJS)
 	$(DIR_GUARD)
