@@ -32,7 +32,7 @@ static naxSample gSamples[512] = {};
 static int voice = 1;
 static s16 channel = 0;
 
-#define NAXTEST_PITCH 0x100
+#define NAXTEST_PITCH 0x800
 // #define NAXTEST_PITCH 0x500
 // #define NAXTEST_PITCH 0x3FFF
 #define SPU_DST_ADDR (0x4000 << 1)
@@ -71,8 +71,8 @@ void naxTest() {
     // sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
     // printf("Voice transfer complete\n");
 
-    sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
     sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST_ADDR);
+    // sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
 
     printf("Pitch %04x\n", NAXTEST_PITCH);
     // printf("Keying on!\n");
@@ -85,50 +85,49 @@ void naxTest() {
     for (int i = 0; i < 512; i++) {
         timeout = 0;
         while (1) {
-            if (i == 16) {
-                gSamples[i].mark = NAX_SWITCH_PITCH;
-                GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
-                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
-                sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0);
-
-                break;
-            }
-
-            if (i == 32) {
-                gSamples[i].mark = NAX_KEY_ON;
-                GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
-                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
-                sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
-
-                break;
-            }
-
-            if (i == 64) {
-                gSamples[i].mark = NAX_UPLOAD;
-                GetSystemTime(&gSamples[i].clock);
-                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
-                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
-
-                int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8 *)adpcm_silence, (u32 *)SPU_DST_ADDR, sizeof(adpcm_silence));
-                if (trans < 0) {
-                    printf("Bad transfer\n");
-                    return;
-                }
-
-                sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
-                sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, NAXTEST_PITCH);
-
-                break;
-            }
-
             u32 newNax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
             u32 newlsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
 
-            if (newlsa != lsa) {
+            if (i == 2) {
+                gSamples[i].mark = NAX_KEY_ON;
                 GetSystemTime(&gSamples[i].clock);
+                gSamples[i].nax = newNax;
+                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
+                sceSdSetSwitch(channel | SD_SWITCH_KON, (1 << voice));
+                break;
+            }
 
+            /*
+              if (i == 16) {
+                  gSamples[i].mark = NAX_SWITCH_PITCH;
+                  GetSystemTime(&gSamples[i].clock);
+                  gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                  gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
+                  sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0);
+
+                  break;
+              }
+
+              if (i == 64) {
+                  gSamples[i].mark = NAX_UPLOAD;
+                  GetSystemTime(&gSamples[i].clock);
+                  gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                  gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
+
+                  int trans = sceSdVoiceTrans(channel, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, (u8 *)adpcm_silence, (u32 *)SPU_DST_ADDR, sizeof(adpcm_silence));
+                  if (trans < 0) {
+                      printf("Bad transfer\n");
+                      return;
+                  }
+
+                  sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
+                  sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, NAXTEST_PITCH);
+
+                  break;
+              }
+              */
+
+            if (newlsa != lsa) {
                 gSamples[i].mark = NAX_LSA;
                 gSamples[i].nax = newNax;
                 gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
@@ -140,8 +139,6 @@ void naxTest() {
             }
 
             if (newNax != nax) {
-                GetSystemTime(&gSamples[i].clock);
-
                 gSamples[i].mark = NAX_SAMPLE;
                 gSamples[i].nax = newNax;
                 gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
@@ -152,17 +149,17 @@ void naxTest() {
                 break;
             }
 
-            if (timeout >= 1000) {
-                gSamples[i].mark = NAX_TIMEOUT;
-                gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
-                gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
-                GetSystemTime(&gSamples[i].clock);
+              if (timeout >= 1000) {
+                  gSamples[i].mark = NAX_TIMEOUT;
+                  gSamples[i].nax = (read16(SD_VA_NAX(channel, voice)) << 16) | read16(SD_VA_NAX(channel, voice) + 2);
+                  gSamples[i].lsa = (read16(SD_VA_LSAX(channel, voice)) << 16) | read16(SD_VA_LSAX(channel, voice) + 2);
+                  GetSystemTime(&gSamples[i].clock);
 
-                break;
-            }
+                  break;
+              }
+              timeout++;
 
-            timeout++;
-            DelayThread(10);
+            // DelayThread(10);
         }
     }
 

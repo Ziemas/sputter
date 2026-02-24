@@ -60,11 +60,14 @@ I_GetThreadId
 I_StartThread
 I_iWakeupThread
 I_CreateThread
+I_DeleteThread
+I_TerminateThread
 I_SleepThread
 I_GetSystemTime
 I_SysClock2USec
 I_USec2SysClock
 I_SetAlarm
+I_CancelAlarm
 thbase_IMPORTS_end
 
 timrman_IMPORTS_start

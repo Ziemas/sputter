@@ -103,7 +103,7 @@ void reverb_upsample() {
 
 static volatile int test;
 
-int spu2irq(int c, void *) {
+static int spu2irq(int c, void *) {
     // printf("[%d] got irq\n", c);
 
     test = c + 1;

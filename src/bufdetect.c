@@ -6,9 +6,9 @@ static u8 autodmabuf[4096];
 
 void fastwait() {
     int result;
-    do
+    do {
         result = sceSdVoiceTransStatus(1, 0);
-    while (!result);
+    } while (!result);
 }
 
 u8 seen[0x1000] = {};
@@ -32,7 +32,7 @@ void sync_buf() {
 
     do {
         sceSdVoiceTrans(1, 1, (u8 *)&buf, (u32 *)0x3000, 64);
-        //sceSdVoiceTransStatus(1, SPU_WAIT_FOR_TRANSFER);
+        // sceSdVoiceTransStatus(1, SPU_WAIT_FOR_TRANSFER);
         fastwait();
 
         u32 status = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
@@ -43,7 +43,7 @@ void sync_buf() {
         i++;
 
         if (buf[0] != lastVal) {
-            //printf("saw new val\n");
+            // printf("saw new val\n");
             sceSdBlockTrans(0, SD_TRANS_STOP, 0, 0);
             sceSdBlockTrans(0, SD_TRANS_LOOP | SD_TRANS_WRITE_FROM, autodmabuf, 4096, &autodmabuf[2048]);
             lastVal = buf[0];
@@ -71,7 +71,6 @@ void bufdetect() {
 
     sceSdBlockTrans(0, SD_TRANS_LOOP, autodmabuf, 0x1000u);
 
-
     u32 status = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
     while (1) {
         u32 status2 = sceSdBlockTransStatus(0, 0) & 0xFFFFFF;
@@ -82,12 +81,11 @@ void bufdetect() {
         printf("dma at %x\n", status2);
     }
 
-
-    //int timeout = 10000;
-    //u16 sample = 0;
-    //while (timeout--) {
-    //    sceSdVoiceTrans(1, 1, (u8 *)&buf, (u32 *)0x4400, 64);
-    //    fastwait();
+    // int timeout = 10000;
+    // u16 sample = 0;
+    // while (timeout--) {
+    //     sceSdVoiceTrans(1, 1, (u8 *)&buf, (u32 *)0x4400, 64);
+    //     fastwait();
 
     //    sample = buf[0];
 
@@ -101,9 +99,9 @@ void bufdetect() {
     //    }
     //}
 
-    //printf("sample %04x\n", sample);
+    // printf("sample %04x\n", sample);
 
-    //return;
+    // return;
 
     int it = 0;
     int test = 0;
@@ -139,5 +137,5 @@ void bufdetect() {
     } while (it < 50);
 
     printf("exit\n");
-    //printf("passed after %d iterations", it);
+    // printf("passed after %d iterations", it);
 }

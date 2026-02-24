@@ -34,7 +34,7 @@ void sputterThread(void *param) {
     // memdump();
     // naxTest();
     // noiseTest();
-     playSound();
+    // playSound();
     // envx();
     // slide();
     // blockRead();
@@ -44,17 +44,26 @@ void sputterThread(void *param) {
     // reverbregtest();
     // voltest();
     // reverb_upsample();
-    // dmaspeed();
+    dmaspeed();
     // tsatest();
     // deckard_hack();
     // reverb_irq();
+    // irqtest();
 
     // SleepThread();
 }
 
 s32 _start(int argc, char *argv[]) {
+    if (argc < 0) {
+        printf("unloading sputter\n");
+        TerminateThread(sputterThid);
+        DeleteThread(sputterThid);
+
+        return MODULE_REMOVABLE_END;
+    }
+
     if (sceSdInit(0) < 0) {
-        printf("SD INIT FAILED");
+        printf("SD INIT FAILED\n");
         return MODULE_NO_RESIDENT_END;
     }
 

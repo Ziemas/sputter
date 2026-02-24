@@ -10,7 +10,7 @@ IOP_BIN = sputter.irx
 IOP_OBJS = src/sputter.o src/naxtest.o src/noisetest.o src/playsound.o \
 			src/envx.o src/blockread.o src/bufdetect.o src/dmatest.o \
 			src/reverb.o src/memdump.o src/slide.o src/voltest.o src/dmaspeed.o \
-			src/tsatest.o imports.o
+			src/tsatest.o src/irqtest.o imports.o
 IOP_LIBS =
 #IOP_TABS = stdio.tab libsd.tab ioman.tab thbase.tab sysmem.tab sysclib.tab
 

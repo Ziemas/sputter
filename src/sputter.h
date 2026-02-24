@@ -75,6 +75,7 @@ void dmaspeed();
 void tsatest();
 void deckard_hack();
 void reverb_irq();
+void irqtest();
 
 u32 loadSound(const char *filename, u32 channel, u32 *spudst);
 #endif // __SPUTTER_H_
