@@ -62,10 +62,10 @@ s32 _start(int argc, char *argv[]) {
         return MODULE_REMOVABLE_END;
     }
 
-    if (sceSdInit(0) < 0) {
-        printf("SD INIT FAILED\n");
-        return MODULE_NO_RESIDENT_END;
-    }
+    //if (sceSdInit(0) < 0) {
+    //    printf("SD INIT FAILED\n");
+    //    return MODULE_NO_RESIDENT_END;
+    //}
 
     iop_thread_t thread = {};
     thread.attr = TH_C;

@@ -1,67 +1,130 @@
 #include "sputter.h"
 
-struct sample {
-    u32 start, end;
-    u32 size;
-    int direction, channel;
-};
-
-struct sample samples[10 * 2 * 2];
-
 static int dst = 0x10000;
-
 static int storage[0x8000];
 
-static void do_transfer(struct sample *s, int size, int channel, int direction) {
+static void SetDmaWrite(s32 chan) {
+    volatile u32 *reg = (volatile u32 *)U32_REGISTER(0x1014 + (chan << 10));
+    *reg = (*reg & 0xF0FFFFFF);
+}
+
+static void SetDmaRead(s32 chan) {
+    volatile u32 *reg = (volatile u32 *)U32_REGISTER(0x1014 + (chan << 10));
+    *reg = (*reg & 0xF0FFFFFF) | 0x2000000;
+}
+
+static s32 SetupDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size) {
+    u32 direction;
+
+    if (read16(SD_CORE_ATTR(chan)) & SD_DMA_IN_PROCESS)
+        return -1;
+
+    if (read16(SD_DMA_CHCR(chan)) & SD_DMA_START)
+        return -2;
+
+    write16(SD_A_TSA_HI(chan), (u32)spu_addr >> 17);
+    write16(SD_A_TSA_LO(chan), (u32)spu_addr >> 1);
+
+    if (mode == SD_TRANS_WRITE) {
+        SetDmaWrite(chan);
+
+        direction = SD_DMA_DIR_IOP2SPU;
+        mask16(SD_CORE_ATTR(chan), SD_CORE_DMA, SD_DMA_WRITE);
+    } else if (mode == SD_TRANS_READ) {
+        SetDmaRead(chan);
+
+        direction = SD_DMA_DIR_SPU2IOP;
+        mask16(SD_CORE_ATTR(chan), SD_CORE_DMA, SD_DMA_READ);
+    } else {
+        return -3;
+    }
+
+    write32(SD_DMA_ADDR(chan), (u32)iop_addr);
+    write32(SD_DMA_MSIZE(chan), (((size + 63) / 64) << 16) | 0x10);
+    write32(SD_DMA_CHCR(chan), SD_DMA_CS | direction);
+
+    return size;
+}
+
+static void StartDma(int chan) {
+    set32(SD_DMA_CHCR(chan), SD_DMA_START);
+}
+
+static void WaitDma(int chan) {
+    // Wait for dma completion
+    while (read32(SD_DMA_CHCR(chan)) & SD_DMA_START) {
+    }
+
+    // Wait for SPU FIFO
+    while ((read16(SD_C_STATX(chan)) & 0x80) == 0) {
+    }
+}
+
+static void EndDma(int chan) {
+    // Clear DMA mode and wait for it to take
+    clear16(SD_CORE_ATTR(chan), SD_CORE_DMA);
+    while ((read16(SD_CORE_ATTR(chan)) & 0x30) != 0) {
+    }
+}
+
+static u32 time_transfer(int size, int channel, int direction) {
     u32 start, end;
+    int res;
+
+    res = SetupDma(channel, direction, (u8 *)storage, (u32 *)dst, size);
+    if (res < 0) {
+        printf("setup failed %d\n", res);
+    }
 
     // read sysclock timer directly
     start = _lw(0xBF801480);
-    sceSdVoiceTrans(channel, direction | SD_TRANS_MODE_DMA, (u8 *)storage, (u32 *)dst, size);
-    sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
+
+    StartDma(channel);
+    WaitDma(channel);
+    EndDma(channel);
+
     end = _lw(0xBF801480);
 
-    s->size = size;
-    s->start = start;
-    s->end = end;
-    s->channel = channel;
-    s->direction = direction;
+    return (int)(end - start);
+}
+
+static void test_transfer(int size, int channel, int direction) {
+    u32 res, avg = 0, min = -1, max = 0;
+    char *dir = direction ? "Read" : "Write";
+    int dma = channel ? 7 : 4;
+
+    for (int i = 0; i < 200; i++) {
+        // Delay to make sure we don't trigger the deckard hacks
+        DelayThread(40000);
+
+        res = time_transfer(size, channel, direction);
+        min = min(res, min);
+        max = max(res, max);
+        avg = ((avg * i) + res) / (i + 1);
+    }
+
+    printf("DMA[%d], %1s,  %5d,  %6d, %6d, %6d\n", dma, dir, size, avg, min, max);
 }
 
 void dmaspeed() {
-    struct sample *s;
-
-    memset(samples, 0, sizeof(samples));
-
-    s = samples;
-
-    DelayThread(40000);
+    printf("Channel, Access, Size, Avg Cycles, Min Cycles, Max Cycles\n");
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             int size = 64;
 
             for (int k = 0; k < 10; k++) {
-                do_transfer(s, size, i, j);
-                s++;
+                test_transfer(size, i, j);
 
                 size *= 2;
-                DelayThread(40000);
             }
         }
     }
-
-    for (int i = 0; i < (10 * 2 * 2); i++) {
-        u64 time = (int)(samples[i].end - samples[i].start);
-        char *dir = samples[i].direction ? "read" : "write";
-        int dma = samples[i].channel ? 7 : 4;
-        printf("DMA[%d] %s of %d bytes took %llu cycles\n", dma, dir, samples[i].size, time);
-    }
 }
 
+/*
 static u8 autodmabuf[4096];
 
-/*
 void deckard_hack() {
     memset(autodmabuf, 0, sizeof(autodmabuf));
     memset(samples, 0, sizeof(samples));

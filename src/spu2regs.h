@@ -47,7 +47,7 @@
 #define SD_A_TSA_LO(core) SD_A_REG((core), 0x0A)
 #define SD_A_FIFO(core) SD_A_REG((core), 0x0C) // Sound Transfer Data
 
-#define SD_VA_REG(core, voice, reg) SD_BASE_REG(0x1C0 + ((core) << 10) + ((voice)*12) + (reg))
+#define SD_VA_REG(core, voice, reg) SD_BASE_REG(0x1C0 + ((core) << 10) + ((voice) * 12) + (reg))
 #define SD_VA_SSA_HI(core, voice) SD_VA_REG((core), (voice), 0x00)
 #define SD_VA_SSA_LO(core, voice) SD_VA_REG((core), (voice), 0x02)
 #define SD_VA_LSAX(core, voice) SD_VA_REG((core), (voice), 0x04)
@@ -58,7 +58,7 @@
 #define SD_S_ENDX_HI(core) ((0xBF900340 + ((core) << 10)))
 #define SD_S_ENDX_LO(core) ((0xBF900342 + ((core) << 10)))
 
-#define SD_P_REG(core, reg) SD_BASE_REG(0x760 + ((core)*40) + (reg))
+#define SD_P_REG(core, reg) SD_BASE_REG(0x760 + ((core) * 40) + (reg))
 #define SD_P_MVOLL(core) SD_P_REG((core), 0x00)
 #define SD_P_MVOLR(core) SD_P_REG((core), 0x02)
 #define SD_P_EVOLL(core) SD_P_REG((core), 0x04)
@@ -130,135 +130,45 @@
 
 static inline u32
 read32(u32 addr) {
-    u32 data;
-    __asm__ volatile("lw %0, 0(%1)"
-                     : "=r"(data)
-                     : "r"(addr)
-                     : "memory");
-    return data;
+    volatile u32 *a = (volatile u32 *)addr;
+
+    return *a;
 }
 
 static inline void
 write32(u32 addr, u32 data) {
-    __asm__ volatile("sw %0, 0(%1)"
-                     :
-                     : "r"(data), "r"(addr)
-                     : "memory");
+    volatile u32 *a = (volatile u32 *)addr;
+
+    *a = data;
 }
 
 static inline u32
 set32(u32 addr, u32 set) {
-    u32 data;
-    __asm__ volatile("lw %0, 0(%1)\n"
-                     "or %0, %2\n"
-                     "sw %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(set)
-                     : "memory");
-    return data;
+    volatile u32 *a = (volatile u32 *)addr;
+    u32 d = *a | set;
+
+    *a = d;
+    return d;
 }
 
 static inline u32
 clear32(u32 addr, u32 clear) {
-    u32 data;
-    __asm__ volatile("lw %0, 0(%1)\n"
-                     "not %2\n"
-                     "and %0, %2\n"
-                     "sw %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(clear)
-                     : "memory");
-    return data;
+    volatile u32 *a = (volatile u32 *)addr;
+    u32 d = *a & ~clear;
+
+    *a = d;
+    return d;
 }
 
 static inline u32
 mask32(u32 addr, u32 clear, u32 set) {
-    u32 data;
-    __asm__ volatile("lw %0, 0(%1)\n"
-                     "not %3\n"
-                     "and %0, %3\n"
-                     "or %0, %2\n"
-                     "sw %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(set), "r"(clear)
-                     : "memory");
-    return data;
-}
+    volatile u32 *a = (volatile u32 *)addr;
+    u32 d = *a;
 
-static inline u16
-read16(u32 addr) {
-    u16 data;
-    __asm__ volatile("lh %0, 0(%1)"
-                     : "=r"(data)
-                     : "r"(addr)
-                     : "memory");
-    return data;
-}
+    d = (d & ~clear) | set;
 
-static inline void
-write16(u32 addr, u16 data) {
-    __asm__ volatile("sh %0, 0(%1)"
-                     :
-                     : "r"(data), "r"(addr)
-                     : "memory");
-}
-
-static inline u16
-set16(u32 addr, u16 set) {
-    u16 data;
-    __asm__ volatile("lh %0, 0(%1)\n"
-                     "or %0, %2\n"
-                     "sh %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(set)
-                     : "memory");
-    return data;
-}
-
-static inline u16
-clear16(u32 addr, u16 clear) {
-    u16 data;
-    __asm__ volatile("lh %0, 0(%1)\n"
-                     "not %2\n"
-                     "and %0, %2\n"
-                     "sh %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(clear)
-                     : "memory");
-    return data;
-}
-
-static inline u16
-mask16(u32 addr, u16 clear, u16 set) {
-    u16 data;
-    __asm__ volatile("lh %0, 0(%1)\n"
-                     "not %3\n"
-                     "and %0, %3\n"
-                     "or %0, %2\n"
-                     "sh %0, 0(%1)\n"
-                     : "=&r"(data)
-                     : "r"(addr), "r"(set), "r"(clear)
-                     : "memory");
-    return data;
-}
-
-
-static inline u8
-read8(u32 addr) {
-    u8 data;
-    __asm__ volatile("lb %0, 0(%1)"
-                     : "=r"(data)
-                     : "r"(addr)
-                     : "memory");
-    return data;
-}
-
-static inline void
-write8(u32 addr, u8 data) {
-    __asm__ volatile("sb %0, 0(%1)"
-                     :
-                     : "r"(data), "r"(addr)
-                     : "memory");
+    *a = d;
+    return d;
 }
 
 static inline int
@@ -269,6 +179,40 @@ poll32(u32 addr, u32 mask, u32 target) {
             return 0;
         }
     }
+}
+
+static inline u16
+read16(u32 addr) {
+    volatile u16 *a = (volatile u16 *)addr;
+
+    return *a;
+}
+
+static inline void
+write16(u32 addr, u16 data) {
+    volatile u16 *a = (volatile u16 *)addr;
+
+    *a = data;
+}
+
+static inline u16
+clear16(u32 addr, u16 clear) {
+    volatile u16 *a = (volatile u16 *)addr;
+    u16 d = *a & ~clear;
+
+    *a = d;
+    return d;
+}
+
+static inline u16
+mask16(u32 addr, u16 clear, u16 set) {
+    volatile u16 *a = (volatile u16 *)addr;
+    u16 d = *a;
+
+    d = (d & ~clear) | set;
+
+    *a = d;
+    return d;
 }
 
 #endif /* __SPU2REGS_H__ */
